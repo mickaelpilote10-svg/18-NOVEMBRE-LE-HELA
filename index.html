@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ROAD TRIP — Permis Celebration 2026</title>
+<meta name="description" content="Road trip du 18 novembre 2026 pour fêter un permis : Farvagny, Granges-Paccot, Romont.">
+<meta name="theme-color" content="#080808">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+/* ===== Variables ===== */
+:root{
+  --bg:#080808; --red:#e10600; --red-soft:rgba(225,6,0,.35);
+  --text:#fff; --muted:#b4b4b8; --glass:rgba(255,255,255,.05); --line:rgba(255,255,255,.12);
+  --display:'Big Shoulders Display','Arial Narrow',Impact,sans-serif;
+  --body:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{background:var(--bg);color:var(--text);font-family:var(--body);line-height:1.6;overflow-x:hidden}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+section{padding:96px 24px}
+.wrap{max-width:1100px;margin:0 auto}
+h2{font-family:var(--display);font-weight:900;font-size:clamp(2.2rem,6vw,4rem);line-height:1;letter-spacing:.01em;text-transform:uppercase;margin-bottom:12px}
+.lead{color:var(--muted);max-width:60ch;margin-bottom:40px}
+.glass{background:var(--glass);border:1px solid var(--line);border-radius:14px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.btn{display:inline-block;font:700 .95rem var(--body);letter-spacing:.06em;text-transform:uppercase;text-decoration:none;
+  padding:15px 28px;border-radius:4px;border:1px solid var(--red);background:var(--red);color:#fff;cursor:pointer;
+  box-shadow:0 0 28px var(--red-soft);transition:transform .2s,box-shadow .2s,background .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 0 44px var(--red)}
+.btn.ghost{background:transparent;box-shadow:none}
+.btn.ghost:hover{background:var(--red)}
+
+/* ===== Loader ===== */
+#loader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:grid;place-items:center;transition:opacity .6s,visibility .6s}
+#loader.done{opacity:0;visibility:hidden}
+.ld{width:min(280px,70vw);text-align:center}
+.ld b{font:900 2.4rem var(--display);letter-spacing:.08em}
+.ld .bar{height:3px;background:var(--line);margin-top:14px;overflow:hidden;border-radius:3px}
+.ld .bar i{display:block;height:100%;width:0;background:var(--red);box-shadow:0 0 12px var(--red);animation:rev 1.4s ease-out forwards}
+@keyframes rev{to{width:100%}}
+
+/* ===== Nav ===== */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:14px 24px;
+  transition:background .3s,border-color .3s;border-bottom:1px solid transparent}
+nav.solid{background:rgba(8,8,8,.82);backdrop-filter:blur(12px);border-color:var(--line)}
+.logo{font:900 1.3rem var(--display);letter-spacing:.1em;text-decoration:none}
+.logo span{color:var(--red)}
+nav ul{display:flex;gap:26px;list-style:none}
+nav ul a{text-decoration:none;font-size:.85rem;color:var(--muted);transition:color .2s}
+nav ul a:hover{color:#fff}
+.burger{display:none;background:none;border:0;color:#fff;font-size:1.6rem;cursor:pointer}
+@media(max-width:760px){
+  .burger{display:block}
+  nav ul{position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:0;background:rgba(8,8,8,.96);max-height:0;overflow:hidden;transition:max-height .3s}
+  nav ul.open{max-height:300px}
+  nav ul a{display:block;padding:14px 24px;border-top:1px solid var(--line)}
+}
+
+/* ===== Hero : route en perspective, phares ===== */
+#hero{position:relative;min-height:100svh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 100%,rgba(225,6,0,.25),transparent 55%),linear-gradient(#050505,#0d0d0d 60%,#150303)}
+.road{position:absolute;left:50%;bottom:-8%;width:160%;height:62%;transform:translateX(-50%) perspective(380px) rotateX(62deg);
+  background:linear-gradient(90deg,transparent 28%,#161616 28%,#161616 72%,transparent 72%);transform-origin:bottom}
+.road::before{content:"";position:absolute;left:49.4%;width:1.2%;top:0;bottom:0;
+  background:repeating-linear-gradient(to bottom,#fff 0 40px,transparent 40px 90px);background-size:100% 90px;animation:drive .7s linear infinite;opacity:.85}
+.road::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 28%,var(--red) 28%,var(--red) 28.4%,transparent 28.4%,transparent 71.6%,var(--red) 71.6%,var(--red) 72%,transparent 72%);opacity:.7}
+@keyframes drive{to{background-position-y:90px}}
+.lights{position:absolute;bottom:14%;left:50%;width:min(520px,80vw);height:90px;transform:translateX(-50%);
+  background:radial-gradient(circle at 20% 50%,#fff 0 6px,rgba(255,255,255,.35) 12px,transparent 60px),radial-gradient(circle at 80% 50%,#fff 0 6px,rgba(255,255,255,.35) 12px,transparent 60px);
+  filter:blur(2px);animation:pulse 4s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.55}}
+.hero-in{position:relative;z-index:2;padding:110px 20px 60px;max-width:900px}
+.hero-in .kicker{color:var(--muted);font-size:.95rem;letter-spacing:.12em;margin-bottom:10px}
+.hero-in h1{font-family:var(--display);font-weight:900;font-size:clamp(4.2rem,17vw,11rem);line-height:.86;text-transform:uppercase;letter-spacing:.01em;
+  text-shadow:0 0 60px var(--red-soft)}
+.hero-in h1 em{font-style:normal;color:var(--red)}
+.date{font:700 clamp(1.2rem,3.6vw,2rem) var(--display);letter-spacing:.2em;margin:18px 0 6px}
+.slogan{color:var(--muted);font-style:italic;margin-bottom:28px}
+.count{display:flex;gap:12px;justify-content:center;margin:34px 0 0;flex-wrap:wrap}
+.count div{min-width:78px;padding:12px 8px}
+.count b{display:block;font:900 2.2rem var(--display);color:#fff}
+.count small{color:var(--muted);font-size:.75rem}
+#cd-msg{margin-top:14px;color:var(--red);font-weight:700;min-height:1.4em}
+
+/* ===== Timeline ===== */
+.tl{position:relative;margin-left:14px;border-left:2px solid var(--line);padding-left:0}
+.tl-item{position:relative;padding:0 0 22px 34px}
+.tl-item::before{content:"";position:absolute;left:-9px;top:20px;width:16px;height:16px;border-radius:50%;background:var(--bg);border:2px solid var(--red);transition:.3s}
+.tl-item.open::before,.tl-item:hover::before{background:var(--red);box-shadow:0 0 16px var(--red)}
+.tl-btn{width:100%;text-align:left;background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:16px 20px;color:#fff;cursor:pointer;
+  font:700 1.1rem var(--body);display:flex;justify-content:space-between;align-items:center;gap:12px;transition:border-color .2s}
+.tl-btn:hover,.tl-item.open .tl-btn{border-color:var(--red)}
+.tl-btn span.n{font:900 1.5rem var(--display);color:var(--red);margin-right:12px}
+.tl-btn .chev{transition:transform .3s;color:var(--muted)}
+.tl-item.open .chev{transform:rotate(180deg)}
+.tl-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s}
+.tl-item.open .tl-body{grid-template-rows:1fr}
+.tl-body>div{overflow:hidden}
+.tl-body p{padding:12px 20px 0;color:var(--muted)}
+.tl-body a{display:inline-block;margin:10px 20px 0;color:var(--red);font-weight:700;font-size:.9rem;cursor:pointer;text-decoration:underline}
+
+/* ===== Carte ===== */
+#map{height:min(70vh,560px);border-radius:14px;border:1px solid var(--line);background:#111}
+.map-bar{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:18px}
+.map-note{color:var(--muted);font-size:.85rem}
+.pin{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--red);border:2px solid #fff;box-shadow:0 0 14px var(--red)}
+.pin span{display:block;transform:rotate(45deg);text-align:center;line-height:26px;font:900 .85rem var(--display);color:#fff}
+.leaflet-popup-content-wrapper{background:#111;color:#fff;border:1px solid var(--red)}
+.leaflet-popup-tip{background:#111}
+
+/* ===== Stats ===== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px}
+.stat{padding:26px 20px}
+.stat b{display:block;font:900 clamp(2rem,5vw,3rem) var(--display);line-height:1.05;color:#fff}
+.stat small{color:var(--muted)}
+.stat b.tbc{color:var(--red);font-size:1.6rem}
+
+/* ===== Spécial ===== */
+#special{text-align:center;background:radial-gradient(ellipse at 50% 50%,rgba(225,6,0,.16),transparent 65%)}
+#special p{max-width:56ch;margin:20px auto 0;font-size:1.2rem;color:#e6e6e8}
+
+/* ===== Footer & top ===== */
+footer{text-align:center;padding:40px 24px;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem}
+footer b{font:900 1.4rem var(--display);letter-spacing:.12em;color:#fff;display:block}
+#top{position:fixed;right:20px;bottom:20px;z-index:90;width:48px;height:48px;border-radius:50%;border:1px solid var(--red);background:rgba(8,8,8,.85);color:#fff;
+  font-size:1.2rem;cursor:pointer;opacity:0;visibility:hidden;transition:.3s;box-shadow:0 0 18px var(--red-soft)}
+#top.show{opacity:1;visibility:visible}
+
+/* Apparition au défilement (un seul mécanisme, sobre) */
+.rv{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s}
+.rv.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  .rv{opacity:1;transform:none}html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<div id="loader" aria-hidden="true"><div class="ld"><b>ROAD TRIP</b><div class="bar"><i></i></div></div></div>
+
+<nav id="nav">
+  <a href="#hero" class="logo">ROAD TRIP <span>2026</span></a>
+  <button class="burger" id="burger" aria-label="Ouvrir le menu" aria-expanded="false">☰</button>
+  <ul id="menu">
+    <li><a href="#programme">Programme</a></li>
+    <li><a href="#carte">Carte</a></li>
+    <li><a href="#stats">Chiffres</a></li>
+    <li><a href="#special">Souvenirs</a></li>
+  </ul>
+</nav>
+
+<header id="hero">
+  <div class="road" aria-hidden="true"></div>
+  <div class="lights" aria-hidden="true"></div>
+  <div class="hero-in">
+    <p class="kicker">Permis Celebration</p>
+    <h1>Road Trip <em>2026</em></h1>
+    <p class="date">18 NOVEMBRE 2026</p>
+    <p class="slogan">« Un permis. Deux pilotes. Une journée. Des souvenirs. »</p>
+    <a class="btn" href="#programme">Découvrir le programme</a>
+    <div class="count" id="count" role="timer" aria-live="off">
+      <div class="glass"><b id="cd-d">--</b><small>jours</small></div>
+      <div class="glass"><b id="cd-h">--</b><small>heures</small></div>
+      <div class="glass"><b id="cd-m">--</b><small>minutes</small></div>
+      <div class="glass"><b id="cd-s">--</b><small>secondes</small></div>
+    </div>
+    <p id="cd-msg"></p>
+  </div>
+</header>
+
+<section id="programme">
+  <div class="wrap">
+    <h2 class="rv">Le programme</h2>
+    <p class="lead rv">Neuf étapes, du premier tour de clé au retour. Touchez une étape pour la détailler ou la voir sur la carte.</p>
+    <div class="tl" id="timeline"></div>
+  </div>
+</section>
+
+<section id="carte">
+  <div class="wrap">
+    <h2 class="rv">Le parcours</h2>
+    <p class="lead rv">Zoomez, déplacez la carte, touchez un repère pour lire l'étape.</p>
+    <div id="map" class="rv" role="region" aria-label="Carte du parcours"></div>
+    <div class="map-bar">
+      <a class="btn" id="gmaps" target="_blank" rel="noopener">Ouvrir dans Google Maps</a>
+      <button class="btn ghost" id="fit" type="button">Voir tout le parcours</button>
+      <span class="map-note">Positions approximatives des localités. La ligne relie les étapes, ce n'est pas le tracé routier exact. Le McDonald's est placé sur Granges-Paccot, sans adresse précise.</span>
+    </div>
+  </div>
+</section>
+
+<section id="stats">
+  <div class="wrap">
+    <h2 class="rv">En chiffres</h2>
+    <p class="lead rv">Les valeurs non vérifiées restent marquées « À calculer ».</p>
+    <div class="stats" id="statGrid"></div>
+  </div>
+</section>
+
+<section id="special">
+  <div class="wrap">
+    <h2 class="rv">Une journée, un permis, des souvenirs.</h2>
+    <p class="rv">Certaines journées ne sont pas comme les autres. Aujourd'hui, on célèbre un nouveau permis, une nouvelle liberté et surtout le plaisir de prendre la route entre amis. Direction les routes fribourgeoises.</p>
+  </div>
+</section>
+
+<footer><b>ROAD TRIP 2026</b>Permis Celebration — 18 novembre 2026</footer>
+<button id="top" aria-label="Revenir en haut" type="button">↑</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+/* ===== Configuration (modifiable) ===== */
+const CONFIG = {
+  eventDate: new Date(2026, 10, 18, 0, 0, 0),   // 18 nov. 2026, heure locale
+  pilots: 2,
+  distance: null,   // ex. "42 km" quand vérifié, sinon null -> « À calculer »
+  duration: null    // ex. "3 h" quand vérifié
+};
+
+/* Étapes. coords = positions approximatives des localités (centres), à ajuster si besoin. */
+const STEPS = [
+  {name:"Départ — Farvagny-le-Grand", desc:"Début de notre journée. Rendez-vous et départ entre amis.", c:[46.7389,7.0944], map:true},
+  {name:"Farvagny-le-Petit", desc:"Première partie du road trip.", c:[46.7330,7.0950], map:true},
+  {name:"Magnedens", desc:"Traversée du village.", c:[46.7470,7.0830], map:true},
+  {name:"Écuvillens", desc:"Direction la suite du parcours.", c:[46.7620,7.0940], map:true},
+  {name:"Granges-Paccot", desc:"Arrivée dans le secteur de Fribourg.", c:[46.8180,7.1260], map:true},
+  {name:"McDonald's", desc:"Pause repas bien méritée. Moment détente entre amis.", c:[46.8180,7.1260], map:false, pin:"Granges-Paccot (emplacement exact à confirmer)"},
+  {name:"Direction Romont", desc:"Reprise de la route. Découverte des routes de la région.", c:[46.6945,6.9187], map:true},
+  {name:"Retour vers Farvagny-le-Grand", desc:"Dernière partie de la journée. Balade libre dans les communes et alentours.", c:[46.7389,7.0944], map:true},
+  {name:"Fin de journée", desc:"Retour et souvenirs d'une journée spéciale.", c:null}
+];
+
+/* ===== Utilitaires ===== */
+const $ = s => document.querySelector(s);
+const pad = n => String(n).padStart(2,'0');
+
+/* ===== Loader ===== */
+window.addEventListener('load', () => setTimeout(() => $('#loader').classList.add('done'), 1500));
+
+/* ===== Navigation ===== */
+const nav = $('#nav'), top = $('#top'), menu = $('#menu'), burger = $('#burger');
+addEventListener('scroll', () => {
+  nav.classList.toggle('solid', scrollY > 40);
+  top.classList.toggle('show', scrollY > 700);
+}, {passive:true});
+top.onclick = () => scrollTo({top:0, behavior:'smooth'});
+burger.onclick = () => { const o = menu.classList.toggle('open'); burger.setAttribute('aria-expanded', o); };
+menu.addEventListener('click', e => { if (e.target.tagName === 'A') { menu.classList.remove('open'); burger.setAttribute('aria-expanded', false); } });
+
+/* ===== Compte à rebours ===== */
+function tick(){
+  const diff = CONFIG.eventDate - new Date();
+  if (diff <= 0){
+    ['d','h','m','s'].forEach(k => $('#cd-'+k).textContent = '00');
+    const end = new Date(CONFIG.eventDate.getTime() + 86400000);
+    $('#cd-msg').textContent = new Date() < end ? "C'est aujourd'hui. Bonne route !" : "Merci pour cette journée.";
+    return;
+  }
+  $('#cd-d').textContent = Math.floor(diff/864e5);
+  $('#cd-h').textContent = pad(Math.floor(diff/36e5)%24);
+  $('#cd-m').textContent = pad(Math.floor(diff/6e4)%60);
+  $('#cd-s').textContent = pad(Math.floor(diff/1e3)%60);
+}
+tick(); setInterval(tick, 1000);
+
+/* ===== Carte Leaflet ===== */
+const mapSteps = STEPS.map((s,i) => ({...s, i:i+1})).filter(s => s.c && s.map);
+const map = L.map('map', {scrollWheelZoom:false}).setView([46.75,7.05], 11);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom:18, attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
+}).addTo(map);
+map.on('focus', () => map.scrollWheelZoom.enable());
+map.on('blur', () => map.scrollWheelZoom.disable());
+
+const markers = {};
+STEPS.forEach((s,i) => {
+  if (!s.c) return;
+  const n = i+1;
+  // McDonald's partage la position de Granges-Paccot : léger décalage visuel pour distinguer les repères
+  const pos = s.map ? s.c : [s.c[0]-0.004, s.c[1]+0.006];
+  const icon = L.divIcon({className:'', html:`<div class="pin"><span>${n}</span></div>`, iconSize:[30,30], iconAnchor:[15,30], popupAnchor:[0,-30]});
+  const m = L.marker(pos, {icon}).addTo(map)
+    .bindPopup(`<b>${s.name}</b><br>${s.pin || s.desc}`);
+  markers[i] = m;
+});
+// Ligne du parcours : localités dans l'ordre, retour inclus
+const routePts = STEPS.filter(s => s.c).map(s => s.c);
+L.polyline(routePts, {color:'#e10600', weight:4, opacity:.9, dashArray:'10 8'}).addTo(map);
+const bounds = L.latLngBounds(routePts).pad(.12);
+map.fitBounds(bounds);
+$('#fit').onclick = () => map.flyToBounds(bounds, {duration:1});
+
+/* Itinéraire Google Maps : noms de lieux, pas de coordonnées inventées */
+(function(){
+  const q = n => encodeURIComponent(n + ', Suisse');
+  const p = new URLSearchParams();
+  const url = 'https://www.google.com/maps/dir/?api=1&travelmode=driving'
+    + '&origin=' + q('Farvagny-le-Grand')
+    + '&destination=' + q('Farvagny-le-Grand')
+    + '&waypoints=' + ['Farvagny-le-Petit','Magnedens','Écuvillens','Granges-Paccot','Romont FR'].map(q).join('%7C');
+  $('#gmaps').href = url;
+})();
+
+/* ===== Timeline interactive ===== */
+const tl = $('#timeline');
+STEPS.forEach((s,i) => {
+  const item = document.createElement('div');
+  item.className = 'tl-item rv';
+  const hasMap = !!s.c;
+  item.innerHTML = `
+    <button class="tl-btn" aria-expanded="false"><span><span class="n">${pad(i+1)}</span>${s.name}</span><span class="chev">▾</span></button>
+    <div class="tl-body"><div><p>${s.desc}</p>${hasMap ? '<a role="button" tabindex="0">Voir sur la carte</a>' : ''}</div></div>`;
+  const btn = item.querySelector('.tl-btn');
+  btn.onclick = () => {
+    const open = item.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open);
+  };
+  const link = item.querySelector('.tl-body a');
+  if (link){
+    const go = () => {
+      $('#carte').scrollIntoView({behavior:'smooth'});
+      setTimeout(() => { map.flyTo(markers[i].getLatLng(), 14, {duration:1.2}); markers[i].openPopup(); }, 600);
+    };
+    link.onclick = go;
+    link.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } };
+  }
+  tl.appendChild(item);
+});
+
+/* ===== Statistiques ===== */
+const stats = [
+  [STEPS.length, "étapes"],
+  [CONFIG.pilots, "pilotes"],
+  ["18 nov. 2026", "date de l'événement"],
+  [CONFIG.distance, "distance totale estimée"],
+  [CONFIG.duration, "durée estimée"]
+];
+$('#statGrid').innerHTML = stats.map(([v,l]) =>
+  `<div class="stat glass rv"><b class="${v ? '' : 'tbc'}">${v || 'À calculer'}</b><small>${l}</small></div>`).join('');
+
+/* ===== Apparition au défilement ===== */
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }), {threshold:.12});
+document.querySelectorAll('.rv').forEach(el => io.observe(el));
+</script>
+</body>
+</html>
